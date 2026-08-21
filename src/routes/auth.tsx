@@ -46,14 +46,15 @@ export async function ensureProfile() {
   const user = data.user;
   if (!user) return;
   const meta = (user.user_metadata ?? {}) as Record<string, string | undefined>;
-  await supabase.rpc("bootstrap_profile", {
+  const args: Record<string, string> = {
     _full_name: meta["full_name"] || user.email || "CSU User",
     _email: user.email ?? "",
-    _student_no: meta["student_no"] ?? undefined,
-    _course: meta["course"] ?? undefined,
-    _year_level: meta["year_level"] ?? undefined,
-    _department: meta["department"] ?? undefined,
-  });
+  };
+  for (const key of ["student_no", "course", "year_level", "department"] as const) {
+    const value = meta[key];
+    if (value) args[`_${key}`] = value;
+  }
+  await supabase.rpc("bootstrap_profile", args as { _full_name: string; _email: string });
 }
 
 function AuthPage() {
