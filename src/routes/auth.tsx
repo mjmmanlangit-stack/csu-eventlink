@@ -49,10 +49,10 @@ export async function ensureProfile() {
   await supabase.rpc("bootstrap_profile", {
     _full_name: meta["full_name"] || user.email || "CSU User",
     _email: user.email ?? "",
-    _student_no: meta["student_no"] ?? null,
-    _course: meta["course"] ?? null,
-    _year_level: meta["year_level"] ?? null,
-    _department: meta["department"] ?? null,
+    _student_no: meta["student_no"] ?? undefined,
+    _course: meta["course"] ?? undefined,
+    _year_level: meta["year_level"] ?? undefined,
+    _department: meta["department"] ?? undefined,
   });
 }
 
