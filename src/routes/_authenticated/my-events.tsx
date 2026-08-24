@@ -83,9 +83,9 @@ function MyEventsPage() {
                     {row.status === "registered" ? (
                       <Pill tone="success">Registered</Pill>
                     ) : (
-                      <Pill tone="danger">Cancelled</Pill>
+                      <Pill tone="destructive">Cancelled</Pill>
                     )}
-                    {row.attendance.length ? (
+                    {[row.attendance].flat().filter(Boolean).length ? (
                       <Pill tone="success">Attended</Pill>
                     ) : (
                       <Pill>Awaiting scan</Pill>
