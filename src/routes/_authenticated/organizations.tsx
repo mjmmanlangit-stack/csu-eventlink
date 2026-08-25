@@ -50,15 +50,20 @@ function OrganizationsPage() {
   const { data } = useQuery({
     queryKey: ["organizations-admin"],
     queryFn: async () => {
-      const [{ data: orgs, error }, { data: officers }, { data: events }] = await Promise.all([
-        supabase.from("organizations").select("*").order("acronym"),
-        supabase.from("organization_officers").select("organization_id, position, profiles(full_name)"),
-        supabase.from("events").select("id, organization_id, status"),
-      ]);
+      const [{ data: orgs, error }, { data: officers }, { data: events }, { data: profiles }] =
+        await Promise.all([
+          supabase.from("organizations").select("*").order("acronym"),
+          supabase.from("organization_officers").select("organization_id, position, user_id"),
+          supabase.from("events").select("id, organization_id, status"),
+          supabase.from("profiles").select("id, full_name"),
+        ]);
       if (error) throw error;
+      const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
       return (orgs ?? []).map((org) => ({
         ...org,
-        officers: (officers ?? []).filter((o) => o.organization_id === org.id),
+        officers: (officers ?? [])
+          .filter((o) => o.organization_id === org.id)
+          .map((o) => ({ position: o.position, full_name: nameById.get(o.user_id) ?? "Unknown" })),
         eventCount: (events ?? []).filter((e) => e.organization_id === org.id).length,
       }));
     },
@@ -116,7 +121,7 @@ function OrganizationsPage() {
                   <ul className="space-y-1 text-sm">
                     {org.officers.map((officer, index) => (
                       <li key={index} className="text-muted-foreground">
-                        {(officer.profiles as { full_name: string } | null)?.full_name} —{" "}
+                        {officer.full_name} —{" "}
                         <span className="text-foreground">{officer.position}</span>
                       </li>
                     ))}
