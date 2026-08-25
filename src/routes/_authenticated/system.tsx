@@ -63,10 +63,10 @@ function SystemPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="User accounts" value={data.users} icon={Users} />
-        <StatCard label="Organizations" value={data.orgs} icon={Building2} />
-        <StatCard label="Events" value={data.events.length} icon={CalendarDays} />
-        <StatCard label="Certificates issued" value={data.certificates} icon={ShieldCheck} />
+        <StatCard label="User accounts" value={data.users} icon={<Users className="h-4 w-4" />} />
+        <StatCard label="Organizations" value={data.orgs} icon={<Building2 className="h-4 w-4" />} />
+        <StatCard label="Events" value={data.events.length} icon={<CalendarDays className="h-4 w-4" />} />
+        <StatCard label="Certificates issued" value={data.certificates} icon={<ShieldCheck className="h-4 w-4" />} />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
