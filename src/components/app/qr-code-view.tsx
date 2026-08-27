@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function QrCodeView({ token, size = 220 }: { token: string; size?: number }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
@@ -29,6 +31,12 @@ export function QrCodeView({ token, size = 220 }: { token: string; size?: number
         )}
       </div>
       <p className="font-mono text-xs text-muted-foreground">{token}</p>
+      <Button asChild size="sm" variant="outline" disabled={!dataUrl}>
+        <a href={dataUrl ?? undefined} download={`event-attendance-${token}.png`}>
+          <Download className="mr-2 h-4 w-4" />
+          Download QR code
+        </a>
+      </Button>
     </div>
   );
 }

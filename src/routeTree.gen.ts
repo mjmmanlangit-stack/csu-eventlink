@@ -12,17 +12,23 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
+import { Route as AuthenticatedOrgRouteRouteImport } from './routes/_authenticated/_org/route'
+import { Route as AuthenticatedStudentRouteImport } from './routes/_authenticated/_student'
 import { Route as AuthenticatedEvaluationsRouteImport } from './routes/_authenticated/evaluations'
-import { Route as AuthenticatedMyEventsRouteImport } from './routes/_authenticated/my-events'
-import { Route as AuthenticatedOrganizationsRouteImport } from './routes/_authenticated/organizations'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
-import { Route as AuthenticatedSystemRouteImport } from './routes/_authenticated/system'
-import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthenticatedAdminOrganizationsRouteImport } from './routes/_authenticated/_admin/organizations'
+import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenticated/_admin/system'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/_admin/users'
+import { Route as AuthenticatedStudentCertificatesRouteImport } from './routes/_authenticated/_student/certificates'
+import { Route as AuthenticatedStudentDashboardRouteImport } from './routes/_authenticated/_student/dashboard'
+import { Route as AuthenticatedStudentMyEventsRouteImport } from './routes/_authenticated/_student/my-events'
 import { Route as AuthenticatedEventsIndexRouteImport } from './routes/_authenticated/events.index'
 import { Route as AuthenticatedEventsEventIdRouteImport } from './routes/_authenticated/events.$eventId'
+import { Route as AuthenticatedOrgOrgDashboardRouteImport } from './routes/_authenticated/_org/org/dashboard'
+import { Route as AuthenticatedOrgOrgEventsEventIdRouteImport } from './routes/_authenticated/_org/org/events/$eventId'
+import { Route as AuthenticatedOrgOrgEventsNewRouteImport } from './routes/_authenticated/_org/org/events/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -38,32 +44,22 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedCertificatesRoute =
-  AuthenticatedCertificatesRouteImport.update({
-    id: '/certificates',
-    path: '/certificates',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgRouteRoute = AuthenticatedOrgRouteRouteImport.update({
+  id: '/_org',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStudentRoute = AuthenticatedStudentRouteImport.update({
+  id: '/_student',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEvaluationsRoute =
   AuthenticatedEvaluationsRouteImport.update({
     id: '/evaluations',
     path: '/evaluations',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedMyEventsRoute = AuthenticatedMyEventsRouteImport.update({
-  id: '/my-events',
-  path: '/my-events',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedOrganizationsRoute =
-  AuthenticatedOrganizationsRouteImport.update({
-    id: '/organizations',
-    path: '/organizations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -76,16 +72,41 @@ const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSystemRoute = AuthenticatedSystemRouteImport.update({
-  id: '/system',
-  path: '/system',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
+const AuthenticatedAdminOrganizationsRoute =
+  AuthenticatedAdminOrganizationsRouteImport.update({
+    id: '/organizations',
+    path: '/organizations',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminSystemRoute =
+  AuthenticatedAdminSystemRouteImport.update({
+    id: '/system',
+    path: '/system',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedStudentCertificatesRoute =
+  AuthenticatedStudentCertificatesRouteImport.update({
+    id: '/certificates',
+    path: '/certificates',
+    getParentRoute: () => AuthenticatedStudentRoute,
+  } as any)
+const AuthenticatedStudentDashboardRoute =
+  AuthenticatedStudentDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedStudentRoute,
+  } as any)
+const AuthenticatedStudentMyEventsRoute =
+  AuthenticatedStudentMyEventsRouteImport.update({
+    id: '/my-events',
+    path: '/my-events',
+    getParentRoute: () => AuthenticatedStudentRoute,
+  } as any)
 const AuthenticatedEventsIndexRoute =
   AuthenticatedEventsIndexRouteImport.update({
     id: '/events/',
@@ -98,101 +119,143 @@ const AuthenticatedEventsEventIdRoute =
     path: '/events/$eventId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOrgOrgDashboardRoute =
+  AuthenticatedOrgOrgDashboardRouteImport.update({
+    id: '/org/dashboard',
+    path: '/org/dashboard',
+    getParentRoute: () => AuthenticatedOrgRouteRoute,
+  } as any)
+const AuthenticatedOrgOrgEventsEventIdRoute =
+  AuthenticatedOrgOrgEventsEventIdRouteImport.update({
+    id: '/org/events/$eventId',
+    path: '/org/events/$eventId',
+    getParentRoute: () => AuthenticatedOrgRouteRoute,
+  } as any)
+const AuthenticatedOrgOrgEventsNewRoute =
+  AuthenticatedOrgOrgEventsNewRouteImport.update({
+    id: '/org/events/new',
+    path: '/org/events/new',
+    getParentRoute: () => AuthenticatedOrgRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/certificates': typeof AuthenticatedCertificatesRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
   '/evaluations': typeof AuthenticatedEvaluationsRoute
-  '/my-events': typeof AuthenticatedMyEventsRoute
-  '/organizations': typeof AuthenticatedOrganizationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
-  '/system': typeof AuthenticatedSystemRoute
-  '/users': typeof AuthenticatedUsersRoute
+  '/organizations': typeof AuthenticatedAdminOrganizationsRoute
+  '/system': typeof AuthenticatedAdminSystemRoute
+  '/users': typeof AuthenticatedAdminUsersRoute
+  '/certificates': typeof AuthenticatedStudentCertificatesRoute
+  '/dashboard': typeof AuthenticatedStudentDashboardRoute
+  '/my-events': typeof AuthenticatedStudentMyEventsRoute
   '/events/$eventId': typeof AuthenticatedEventsEventIdRoute
   '/events/': typeof AuthenticatedEventsIndexRoute
+  '/org/dashboard': typeof AuthenticatedOrgOrgDashboardRoute
+  '/org/events/$eventId': typeof AuthenticatedOrgOrgEventsEventIdRoute
+  '/org/events/new': typeof AuthenticatedOrgOrgEventsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/certificates': typeof AuthenticatedCertificatesRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
   '/evaluations': typeof AuthenticatedEvaluationsRoute
-  '/my-events': typeof AuthenticatedMyEventsRoute
-  '/organizations': typeof AuthenticatedOrganizationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
-  '/system': typeof AuthenticatedSystemRoute
-  '/users': typeof AuthenticatedUsersRoute
+  '/organizations': typeof AuthenticatedAdminOrganizationsRoute
+  '/system': typeof AuthenticatedAdminSystemRoute
+  '/users': typeof AuthenticatedAdminUsersRoute
+  '/certificates': typeof AuthenticatedStudentCertificatesRoute
+  '/dashboard': typeof AuthenticatedStudentDashboardRoute
+  '/my-events': typeof AuthenticatedStudentMyEventsRoute
   '/events/$eventId': typeof AuthenticatedEventsEventIdRoute
   '/events': typeof AuthenticatedEventsIndexRoute
+  '/org/dashboard': typeof AuthenticatedOrgOrgDashboardRoute
+  '/org/events/$eventId': typeof AuthenticatedOrgOrgEventsEventIdRoute
+  '/org/events/new': typeof AuthenticatedOrgOrgEventsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/_org': typeof AuthenticatedOrgRouteRouteWithChildren
+  '/_authenticated/_admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/_student': typeof AuthenticatedStudentRouteWithChildren
   '/_authenticated/evaluations': typeof AuthenticatedEvaluationsRoute
-  '/_authenticated/my-events': typeof AuthenticatedMyEventsRoute
-  '/_authenticated/organizations': typeof AuthenticatedOrganizationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
-  '/_authenticated/system': typeof AuthenticatedSystemRoute
-  '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/_authenticated/_admin/organizations': typeof AuthenticatedAdminOrganizationsRoute
+  '/_authenticated/_admin/system': typeof AuthenticatedAdminSystemRoute
+  '/_authenticated/_admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/_student/certificates': typeof AuthenticatedStudentCertificatesRoute
+  '/_authenticated/_student/dashboard': typeof AuthenticatedStudentDashboardRoute
+  '/_authenticated/_student/my-events': typeof AuthenticatedStudentMyEventsRoute
   '/_authenticated/events/$eventId': typeof AuthenticatedEventsEventIdRoute
   '/_authenticated/events/': typeof AuthenticatedEventsIndexRoute
+  '/_authenticated/_org/org/dashboard': typeof AuthenticatedOrgOrgDashboardRoute
+  '/_authenticated/_org/org/events/$eventId': typeof AuthenticatedOrgOrgEventsEventIdRoute
+  '/_authenticated/_org/org/events/new': typeof AuthenticatedOrgOrgEventsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
-    | '/certificates'
-    | '/dashboard'
     | '/evaluations'
-    | '/my-events'
-    | '/organizations'
     | '/profile'
     | '/reports'
+    | '/organizations'
     | '/system'
     | '/users'
+    | '/certificates'
+    | '/dashboard'
+    | '/my-events'
     | '/events/$eventId'
     | '/events/'
+    | '/org/dashboard'
+    | '/org/events/$eventId'
+    | '/org/events/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/certificates'
-    | '/dashboard'
     | '/evaluations'
-    | '/my-events'
-    | '/organizations'
     | '/profile'
     | '/reports'
+    | '/organizations'
     | '/system'
     | '/users'
+    | '/certificates'
+    | '/dashboard'
+    | '/my-events'
     | '/events/$eventId'
     | '/events'
+    | '/org/dashboard'
+    | '/org/events/$eventId'
+    | '/org/events/new'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/_authenticated/certificates'
-    | '/_authenticated/dashboard'
+    | '/_authenticated/_org'
+    | '/_authenticated/_admin'
+    | '/_authenticated/_student'
     | '/_authenticated/evaluations'
-    | '/_authenticated/my-events'
-    | '/_authenticated/organizations'
     | '/_authenticated/profile'
     | '/_authenticated/reports'
-    | '/_authenticated/system'
-    | '/_authenticated/users'
+    | '/_authenticated/_admin/organizations'
+    | '/_authenticated/_admin/system'
+    | '/_authenticated/_admin/users'
+    | '/_authenticated/_student/certificates'
+    | '/_authenticated/_student/dashboard'
+    | '/_authenticated/_student/my-events'
     | '/_authenticated/events/$eventId'
     | '/_authenticated/events/'
+    | '/_authenticated/_org/org/dashboard'
+    | '/_authenticated/_org/org/events/$eventId'
+    | '/_authenticated/_org/org/events/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -224,18 +287,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/certificates': {
-      id: '/_authenticated/certificates'
-      path: '/certificates'
-      fullPath: '/certificates'
-      preLoaderRoute: typeof AuthenticatedCertificatesRouteImport
+    '/_authenticated/_admin': {
+      id: '/_authenticated/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+    '/_authenticated/_org': {
+      id: '/_authenticated/_org'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedOrgRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/_student': {
+      id: '/_authenticated/_student'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedStudentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/evaluations': {
@@ -243,20 +313,6 @@ declare module '@tanstack/react-router' {
       path: '/evaluations'
       fullPath: '/evaluations'
       preLoaderRoute: typeof AuthenticatedEvaluationsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/my-events': {
-      id: '/_authenticated/my-events'
-      path: '/my-events'
-      fullPath: '/my-events'
-      preLoaderRoute: typeof AuthenticatedMyEventsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/organizations': {
-      id: '/_authenticated/organizations'
-      path: '/organizations'
-      fullPath: '/organizations'
-      preLoaderRoute: typeof AuthenticatedOrganizationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
@@ -273,19 +329,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/system': {
-      id: '/_authenticated/system'
+    '/_authenticated/_admin/organizations': {
+      id: '/_authenticated/_admin/organizations'
+      path: '/organizations'
+      fullPath: '/organizations'
+      preLoaderRoute: typeof AuthenticatedAdminOrganizationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/system': {
+      id: '/_authenticated/_admin/system'
       path: '/system'
       fullPath: '/system'
-      preLoaderRoute: typeof AuthenticatedSystemRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AuthenticatedAdminSystemRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/users': {
-      id: '/_authenticated/users'
+    '/_authenticated/_admin/users': {
+      id: '/_authenticated/_admin/users'
       path: '/users'
       fullPath: '/users'
-      preLoaderRoute: typeof AuthenticatedUsersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_student/certificates': {
+      id: '/_authenticated/_student/certificates'
+      path: '/certificates'
+      fullPath: '/certificates'
+      preLoaderRoute: typeof AuthenticatedStudentCertificatesRouteImport
+      parentRoute: typeof AuthenticatedStudentRoute
+    }
+    '/_authenticated/_student/dashboard': {
+      id: '/_authenticated/_student/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedStudentDashboardRouteImport
+      parentRoute: typeof AuthenticatedStudentRoute
+    }
+    '/_authenticated/_student/my-events': {
+      id: '/_authenticated/_student/my-events'
+      path: '/my-events'
+      fullPath: '/my-events'
+      preLoaderRoute: typeof AuthenticatedStudentMyEventsRouteImport
+      parentRoute: typeof AuthenticatedStudentRoute
     }
     '/_authenticated/events/': {
       id: '/_authenticated/events/'
@@ -301,33 +385,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEventsEventIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/_org/org/dashboard': {
+      id: '/_authenticated/_org/org/dashboard'
+      path: '/org/dashboard'
+      fullPath: '/org/dashboard'
+      preLoaderRoute: typeof AuthenticatedOrgOrgDashboardRouteImport
+      parentRoute: typeof AuthenticatedOrgRouteRoute
+    }
+    '/_authenticated/_org/org/events/$eventId': {
+      id: '/_authenticated/_org/org/events/$eventId'
+      path: '/org/events/$eventId'
+      fullPath: '/org/events/$eventId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgEventsEventIdRouteImport
+      parentRoute: typeof AuthenticatedOrgRouteRoute
+    }
+    '/_authenticated/_org/org/events/new': {
+      id: '/_authenticated/_org/org/events/new'
+      path: '/org/events/new'
+      fullPath: '/org/events/new'
+      preLoaderRoute: typeof AuthenticatedOrgOrgEventsNewRouteImport
+      parentRoute: typeof AuthenticatedOrgRouteRoute
+    }
   }
 }
 
+interface AuthenticatedOrgRouteRouteChildren {
+  AuthenticatedOrgOrgDashboardRoute: typeof AuthenticatedOrgOrgDashboardRoute
+  AuthenticatedOrgOrgEventsEventIdRoute: typeof AuthenticatedOrgOrgEventsEventIdRoute
+  AuthenticatedOrgOrgEventsNewRoute: typeof AuthenticatedOrgOrgEventsNewRoute
+}
+
+const AuthenticatedOrgRouteRouteChildren: AuthenticatedOrgRouteRouteChildren = {
+  AuthenticatedOrgOrgDashboardRoute: AuthenticatedOrgOrgDashboardRoute,
+  AuthenticatedOrgOrgEventsEventIdRoute: AuthenticatedOrgOrgEventsEventIdRoute,
+  AuthenticatedOrgOrgEventsNewRoute: AuthenticatedOrgOrgEventsNewRoute,
+}
+
+const AuthenticatedOrgRouteRouteWithChildren =
+  AuthenticatedOrgRouteRoute._addFileChildren(
+    AuthenticatedOrgRouteRouteChildren,
+  )
+
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminOrganizationsRoute: typeof AuthenticatedAdminOrganizationsRoute
+  AuthenticatedAdminSystemRoute: typeof AuthenticatedAdminSystemRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminOrganizationsRoute: AuthenticatedAdminOrganizationsRoute,
+  AuthenticatedAdminSystemRoute: AuthenticatedAdminSystemRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
+interface AuthenticatedStudentRouteChildren {
+  AuthenticatedStudentCertificatesRoute: typeof AuthenticatedStudentCertificatesRoute
+  AuthenticatedStudentDashboardRoute: typeof AuthenticatedStudentDashboardRoute
+  AuthenticatedStudentMyEventsRoute: typeof AuthenticatedStudentMyEventsRoute
+}
+
+const AuthenticatedStudentRouteChildren: AuthenticatedStudentRouteChildren = {
+  AuthenticatedStudentCertificatesRoute: AuthenticatedStudentCertificatesRoute,
+  AuthenticatedStudentDashboardRoute: AuthenticatedStudentDashboardRoute,
+  AuthenticatedStudentMyEventsRoute: AuthenticatedStudentMyEventsRoute,
+}
+
+const AuthenticatedStudentRouteWithChildren =
+  AuthenticatedStudentRoute._addFileChildren(AuthenticatedStudentRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedOrgRouteRoute: typeof AuthenticatedOrgRouteRouteWithChildren
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedStudentRoute: typeof AuthenticatedStudentRouteWithChildren
   AuthenticatedEvaluationsRoute: typeof AuthenticatedEvaluationsRoute
-  AuthenticatedMyEventsRoute: typeof AuthenticatedMyEventsRoute
-  AuthenticatedOrganizationsRoute: typeof AuthenticatedOrganizationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
-  AuthenticatedSystemRoute: typeof AuthenticatedSystemRoute
-  AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedEventsEventIdRoute: typeof AuthenticatedEventsEventIdRoute
   AuthenticatedEventsIndexRoute: typeof AuthenticatedEventsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedOrgRouteRoute: AuthenticatedOrgRouteRouteWithChildren,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedStudentRoute: AuthenticatedStudentRouteWithChildren,
   AuthenticatedEvaluationsRoute: AuthenticatedEvaluationsRoute,
-  AuthenticatedMyEventsRoute: AuthenticatedMyEventsRoute,
-  AuthenticatedOrganizationsRoute: AuthenticatedOrganizationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
-  AuthenticatedSystemRoute: AuthenticatedSystemRoute,
-  AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedEventsEventIdRoute: AuthenticatedEventsEventIdRoute,
   AuthenticatedEventsIndexRoute: AuthenticatedEventsIndexRoute,
 }

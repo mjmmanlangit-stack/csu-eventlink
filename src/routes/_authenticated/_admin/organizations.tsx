@@ -22,7 +22,7 @@ import {
 import { PageHeader, EmptyState, Field } from "@/components/app/ui-bits";
 import { Pill } from "@/components/app/status-badge";
 
-export const Route = createFileRoute("/_authenticated/organizations")({
+export const Route = createFileRoute("/_authenticated/_admin/organizations")({
   head: () => ({
     meta: [
       { title: "Organizations · CSU EventTrack" },

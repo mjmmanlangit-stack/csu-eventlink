@@ -19,9 +19,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader, EmptyState } from "@/components/app/ui-bits";
 import { Pill } from "@/components/app/status-badge";
-import type { Role } from "@/hooks/use-auth";
+import { normalizeRole, type Role } from "@/hooks/use-auth";
 
-export const Route = createFileRoute("/_authenticated/users")({
+export const Route = createFileRoute("/_authenticated/_admin/users")({
   head: () => ({
     meta: [
       { title: "User Management · CSU EventTrack" },
@@ -60,7 +60,9 @@ function UsersPage() {
         supabase.from("organization_officers").select("user_id, position, organizations(acronym)"),
       ]);
       if (error) throw error;
-      const roleMap = new Map((roles ?? []).map((r) => [r.user_id, r.role as Role]));
+      const roleMap = new Map(
+        (roles ?? []).map((r) => [r.user_id, normalizeRole(r.role as string) as Role]),
+      );
       const officerMap = new Map(
         (officers ?? []).map((o) => [
           o.user_id,

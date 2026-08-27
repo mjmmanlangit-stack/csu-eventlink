@@ -69,34 +69,77 @@ export type ParticipantRow = {
 };
 
 export async function listParticipants(eventId: string) {
-  const { data, error } = await supabase
+  const { data: registrations, error } = await supabase
     .from("event_registrations")
     .select(
-      "id, event_id, student_id, status, registered_at, profiles(full_name, student_no, course, email), attendance(scanned_at), qr_codes(token)",
+      "id, event_id, student_id, status, registered_at",
     )
     .eq("event_id", eventId)
+    .eq("status", "registered")
     .order("registered_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as unknown as ParticipantRow[];
+
+  const studentIds = [...new Set((registrations ?? []).map((registration) => registration.student_id))];
+  const registrationIds = (registrations ?? []).map((registration) => registration.id);
+  const [{ data: profiles, error: profilesError }, { data: attendance, error: attendanceError }] =
+    await Promise.all([
+      studentIds.length
+        ? supabase
+            .from("profiles")
+            .select("id, full_name, student_no, course, email")
+            .in("id", studentIds)
+        : Promise.resolve({ data: [], error: null }),
+      registrationIds.length
+        ? supabase
+            .from("attendance")
+            .select("registration_id, scanned_at")
+            .in("registration_id", registrationIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+  if (profilesError) throw profilesError;
+  if (attendanceError) throw attendanceError;
+
+  const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+  const attendanceByRegistrationId = new Map(
+    (attendance ?? []).map((record) => [record.registration_id, [{ scanned_at: record.scanned_at }]]),
+  );
+  return (registrations ?? []).map((registration) => ({
+    ...registration,
+    profiles: profileById.get(registration.student_id) ?? null,
+    attendance: attendanceByRegistrationId.get(registration.id) ?? [],
+    qr_codes: [],
+  })) as unknown as ParticipantRow[];
 }
 
 export async function myRegistration(eventId: string, userId: string) {
   const { data, error } = await supabase
     .from("event_registrations")
-    .select("id, status, registered_at, qr_codes(token, is_active), attendance(scanned_at)")
+    .select("id, status, registered_at")
     .eq("event_id", eventId)
     .eq("student_id", userId)
     .maybeSingle();
   if (error) throw error;
-  return data as unknown as
-    | {
-        id: string;
-        status: string;
-        registered_at: string;
-        qr_codes: { token: string; is_active: boolean }[];
-        attendance: { scanned_at: string }[];
-      }
-    | null;
+  if (!data) return null;
+
+  const [{ data: qrCodes, error: qrError }, { data: attendance, error: attendanceError }] =
+    await Promise.all([
+      supabase.from("qr_codes").select("token, is_active").eq("registration_id", data.id).maybeSingle(),
+      supabase.from("attendance").select("scanned_at").eq("registration_id", data.id),
+    ]);
+  if (qrError) throw qrError;
+  if (attendanceError) throw attendanceError;
+
+  return {
+    ...data,
+    qr_codes: qrCodes ? [qrCodes] : [],
+    attendance: attendance ?? [],
+  } as {
+    id: string;
+    status: string;
+    registered_at: string;
+    qr_codes: { token: string; is_active: boolean }[];
+    attendance: { scanned_at: string }[];
+  };
 }
 
 export type EvaluationRow = {
@@ -116,13 +159,22 @@ export type EvaluationRow = {
 export async function listEvaluations(filter: { eventId?: string; studentId?: string }) {
   let query = supabase
     .from("evaluations")
-    .select("*, profiles(full_name), events(title)")
+    .select("*")
     .order("submitted_at", { ascending: false });
   if (filter.eventId) query = query.eq("event_id", filter.eventId);
   if (filter.studentId) query = query.eq("student_id", filter.studentId);
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as unknown as EvaluationRow[];
+  const studentIds = [...new Set((data ?? []).map((evaluation) => evaluation.student_id))];
+  const { data: profiles, error: profilesError } = studentIds.length
+    ? await supabase.from("profiles").select("id, full_name").in("id", studentIds)
+    : { data: [], error: null };
+  if (profilesError) throw profilesError;
+  const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+  return (data ?? []).map((evaluation) => ({
+    ...evaluation,
+    profiles: profileById.get(evaluation.student_id) ?? null,
+  })) as unknown as EvaluationRow[];
 }
 
 export type CertificateRow = {
@@ -139,13 +191,41 @@ export type CertificateRow = {
 export async function listCertificates(filter: { eventId?: string; studentId?: string }) {
   let query = supabase
     .from("certificates")
-    .select("*, profiles(full_name, student_no), events(title, starts_at, organizations(name))")
+    .select("*")
     .order("issued_at", { ascending: false });
   if (filter.eventId) query = query.eq("event_id", filter.eventId);
   if (filter.studentId) query = query.eq("student_id", filter.studentId);
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as unknown as CertificateRow[];
+  const studentIds = [...new Set((data ?? []).map((certificate) => certificate.student_id))];
+  const eventIds = [...new Set((data ?? []).map((certificate) => certificate.event_id))];
+  const [{ data: profiles, error: profilesError }, { data: events, error: eventsError }] =
+    await Promise.all([
+      studentIds.length
+        ? supabase.from("profiles").select("id, full_name, student_no").in("id", studentIds)
+        : Promise.resolve({ data: [], error: null }),
+      eventIds.length
+        ? supabase.from("events").select("id, title, starts_at, organization_id").in("id", eventIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+  if (profilesError) throw profilesError;
+  if (eventsError) throw eventsError;
+
+  const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+  const organizationIds = [...new Set((events ?? []).map((event) => event.organization_id))];
+  const { data: organizations, error: organizationsError } = organizationIds.length
+    ? await supabase.from("organizations").select("id, name").in("id", organizationIds)
+    : { data: [], error: null };
+  if (organizationsError) throw organizationsError;
+  const organizationById = new Map((organizations ?? []).map((organization) => [organization.id, organization]));
+  const eventById = new Map(
+    (events ?? []).map((event) => [event.id, { ...event, organizations: organizationById.get(event.organization_id) ?? null }]),
+  );
+  return (data ?? []).map((certificate) => ({
+    ...certificate,
+    profiles: profileById.get(certificate.student_id) ?? null,
+    events: eventById.get(certificate.event_id) ?? null,
+  })) as unknown as CertificateRow[];
 }
 
 export async function eventReport(eventId: string) {

@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { StatCard, PageHeader, EmptyState, formatDateTime } from "@/components/app/ui-bits";
 import { StatusBadge } from "@/components/app/status-badge";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/_authenticated/_student/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard · CSU EventTrack" },
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function DashboardPage() {
   const { session } = useAuth();
-  if (!session) return null;
+  if (!session || !session.role) return null;
   if (session.role === "admin") return <AdminDashboard />;
   if (session.role === "officer") return <OfficerDashboard orgId={session.organizationId} />;
   return <StudentDashboard userId={session.user.id} name={session.profile?.full_name ?? ""} />;

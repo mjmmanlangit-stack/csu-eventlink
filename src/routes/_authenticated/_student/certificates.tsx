@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader, EmptyState, formatDate } from "@/components/app/ui-bits";
 
-export const Route = createFileRoute("/_authenticated/certificates")({
+export const Route = createFileRoute("/_authenticated/_student/certificates")({
   head: () => ({
     meta: [
       { title: "Certificates · CSU EventTrack" },
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/certificates")({
 function CertificatesPage() {
   const { session } = useAuth();
 
-  const { data } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ["certificates", session?.user.id],
     enabled: !!session,
     queryFn: () => listCertificates({ studentId: session!.user.id }),
@@ -44,7 +44,9 @@ function CertificatesPage() {
           ) : undefined
         }
       />
-      {!data?.length ? (
+      {isLoading ? <EmptyState title="Loading certificates..." /> : error ? (
+        <EmptyState title="Unable to load certificates" description={error.message} />
+      ) : !data?.length ? (
         <EmptyState
           title="No certificates yet"
           description="Attend an event and submit its evaluation to earn a certificate."

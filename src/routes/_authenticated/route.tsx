@@ -47,7 +47,8 @@ export const Route = createFileRoute("/_authenticated")({
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; roles: Role[] };
 
 const NAV: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "officer", "admin"] },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student"] },
+  { to: "/org/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["officer"] },
   { to: "/events", label: "Events", icon: CalendarDays, roles: ["student", "officer", "admin"] },
   { to: "/my-events", label: "My Events", icon: CalendarCheck, roles: ["student"] },
   { to: "/evaluations", label: "Evaluations", icon: ClipboardCheck, roles: ["student", "officer"] },
@@ -73,8 +74,8 @@ function AppLayout() {
     staleTime: Infinity,
   });
 
-  const role = session?.role ?? "student";
-  const items = NAV.filter((item) => item.roles.includes(role));
+  const role = session?.role ?? null;
+  const items = role ? NAV.filter((item) => item.roles.includes(role)) : [];
 
   return (
     <div className="min-h-screen bg-secondary/30">

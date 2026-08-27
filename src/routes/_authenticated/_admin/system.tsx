@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader, StatCard, Field } from "@/components/app/ui-bits";
 import { Pill } from "@/components/app/status-badge";
+import { normalizeRole } from "@/hooks/use-auth";
 
-export const Route = createFileRoute("/_authenticated/system")({
+export const Route = createFileRoute("/_authenticated/_admin/system")({
   head: () => ({
     meta: [
       { title: "System Management · CSU EventTrack" },
@@ -36,13 +37,13 @@ function SystemPage() {
         supabase.from("attendance").select("id"),
         supabase.from("certificates").select("id"),
       ]);
-      const roleList = roles.data ?? [];
+      const roleList = (roles.data ?? []).map((r) => normalizeRole(r.role as string));
       return {
         users: profiles.data?.length ?? 0,
         activeUsers: (profiles.data ?? []).filter((p) => p.status === "active").length,
-        admins: roleList.filter((r) => r.role === "admin").length,
-        officers: roleList.filter((r) => r.role === "officer").length,
-        students: roleList.filter((r) => r.role === "student").length,
+        admins: roleList.filter((r) => r === "admin").length,
+        officers: roleList.filter((r) => r === "officer").length,
+        students: roleList.filter((r) => r === "student").length,
         orgs: orgs.data?.length ?? 0,
         activeOrgs: (orgs.data ?? []).filter((o) => o.status === "active").length,
         events: events.data ?? [],

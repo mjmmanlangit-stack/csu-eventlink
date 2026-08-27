@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader, EmptyState, formatDateTime } from "@/components/app/ui-bits";
 import { StatusBadge, Pill } from "@/components/app/status-badge";
 
-export const Route = createFileRoute("/_authenticated/my-events")({
+export const Route = createFileRoute("/_authenticated/_student/my-events")({
   head: () => ({
     meta: [
       { title: "My Events · CSU EventTrack" },

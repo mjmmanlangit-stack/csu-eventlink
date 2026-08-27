@@ -4,6 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type Role = "student" | "officer" | "admin";
 
+export function normalizeRole(value: string | null | undefined): Role {
+  switch (value) {
+    case "admin":
+      return "admin";
+    case "officer":
+    case "organization_officer":
+      return "officer";
+    case "student":
+    default:
+      return "student";
+  }
+}
+
 export type SessionProfile = {
   user: User;
   role: Role;
@@ -26,7 +39,7 @@ export async function fetchSessionProfile(): Promise<SessionProfile | null> {
   const user = userData.user;
   if (!user) return null;
 
-  const [{ data: profile }, { data: roles }, { data: officer }] = await Promise.all([
+  const [{ data: profile }, { data: roles, error: rolesError }, { data: officer }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", user.id),
     supabase
@@ -36,12 +49,26 @@ export async function fetchSessionProfile(): Promise<SessionProfile | null> {
       .maybeSingle(),
   ]);
 
-  const roleList = (roles ?? []).map((r) => r.role as Role);
-  const role: Role = roleList.includes("admin")
+  if (rolesError) throw rolesError;
+
+  const roleList = (roles ?? []).map((r) => normalizeRole(r.role as string));
+  const role: Role | null = roleList.includes("admin")
     ? "admin"
     : roleList.includes("officer")
       ? "officer"
-      : "student";
+      : roleList.includes("student")
+        ? "student"
+        : null;
+
+  if (import.meta.env.DEV) {
+    console.debug("fetchSessionProfile", {
+      userId: user.id,
+      email: user.email,
+      rawRoles: roles ?? [],
+      normalizedRoles: roleList,
+      resolvedRole: role,
+    });
+  }
 
   return {
     user,
@@ -57,7 +84,10 @@ export function useAuth() {
   const query = useQuery({
     queryKey: ["session-profile"],
     queryFn: fetchSessionProfile,
-    staleTime: 30_000,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   return {

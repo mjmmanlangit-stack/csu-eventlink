@@ -37,6 +37,7 @@ create or replace function public.has_role(_user_id uuid, _role app_role)
 returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.user_roles where user_id = _user_id and role = _role);
 $$;
+grant execute on function public.has_role(uuid, public.app_role) to authenticated;
 
 -- ORGANIZATIONS
 create table public.organizations (
@@ -277,7 +278,15 @@ begin
   insert into public.profiles (id, full_name, email, student_no, course, year_level, department)
   values (auth.uid(), _full_name, _email, _student_no, _course, _year_level, _department)
   on conflict (id) do update set full_name = excluded.full_name, updated_at = now();
-  insert into public.user_roles (user_id, role) values (auth.uid(), 'student') on conflict do nothing;
+
+  if not exists (
+    select 1 from public.user_roles
+    where user_id = auth.uid() and role in ('admin', 'officer')
+  ) then
+    insert into public.user_roles (user_id, role)
+    values (auth.uid(), 'student')
+    on conflict (user_id, role) do nothing;
+  end if;
 end;
 $$;
 
@@ -290,10 +299,12 @@ create or replace function public.claim_first_admin() returns void
 language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then raise exception 'Not authenticated'; end if;
-  if exists (select 1 from public.user_roles where role = 'admin') then
+  if exists (select 1 from public.user_roles where role = 'admin' and user_id <> auth.uid()) then
     raise exception 'An administrator already exists';
   end if;
-  insert into public.user_roles (user_id, role) values (auth.uid(),'admin') on conflict do nothing;
+
+  delete from public.user_roles where user_id = auth.uid();
+  insert into public.user_roles (user_id, role) values (auth.uid(), 'admin');
 end;
 $$;
 

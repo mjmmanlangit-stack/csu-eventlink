@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { QrCode, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchSessionProfile } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -59,6 +61,7 @@ export async function ensureProfile() {
 
 function AuthPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [adminExists, setAdminExists] = useState(true);
 
@@ -82,9 +85,27 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    await ensureProfile();
-    setLoading(false);
-    navigate({ to: "/dashboard" });
+    try {
+      await ensureProfile();
+      await queryClient.invalidateQueries({ queryKey: ["session-profile"] });
+      const session = await fetchSessionProfile();
+      if (session?.role === "admin") {
+        navigate({ to: "/system" });
+      } else if (session?.role === "officer") {
+        navigate({ to: "/org/dashboard" });
+      } else {
+        navigate({ to: "/dashboard" });
+      }
+    } catch (postLoginError) {
+      await supabase.auth.signOut();
+      toast.error(
+        postLoginError instanceof Error
+          ? postLoginError.message
+          : "Unable to load your account role.",
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleRegister(form: FormData) {
@@ -121,6 +142,7 @@ function AuthPage() {
     }
     if (data.session) {
       await ensureProfile();
+      await queryClient.invalidateQueries({ queryKey: ["session-profile"] });
       toast.success("Account created");
       navigate({ to: "/dashboard" });
     } else {
@@ -134,9 +156,10 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
+    await queryClient.invalidateQueries({ queryKey: ["session-profile"] });
     toast.success("Administrator role assigned to your account");
     setAdminExists(true);
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/system" });
   }
 
   return (

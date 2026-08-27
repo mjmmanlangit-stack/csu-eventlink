@@ -582,12 +582,23 @@ function ManageTabs({ eventId, event }: { eventId: string; event: EventData }) {
 }
 
 function ParticipantsPanel({ eventId }: { eventId: string }) {
-  const { data } = useQuery({
+  const { data, error, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["participants", eventId],
     queryFn: () => listParticipants(eventId),
   });
 
-  if (!data?.length) return <EmptyState title="No registrations yet" />;
+  if (isLoading) return <EmptyState title="Loading registrations..." />;
+  if (error) return <EmptyState title="Unable to load registrations" description={error.message} />;
+  if (!data?.length) {
+    return (
+      <div className="space-y-3">
+        <EmptyState title="No registrations yet" description="Refresh after a student completes registration." />
+        <Button size="sm" variant="outline" onClick={() => void refetch()} disabled={isFetching}>
+          {isFetching ? "Refreshing..." : "Refresh registrations"}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Card>
@@ -596,6 +607,7 @@ function ParticipantsPanel({ eventId }: { eventId: string }) {
           <TableRow>
             <TableHead>Student</TableHead>
             <TableHead>Student no.</TableHead>
+            <TableHead>Email</TableHead>
             <TableHead>Course</TableHead>
             <TableHead>Registered</TableHead>
             <TableHead>Attendance</TableHead>
@@ -606,6 +618,7 @@ function ParticipantsPanel({ eventId }: { eventId: string }) {
             <TableRow key={p.id}>
               <TableCell className="font-medium">{p.profiles?.full_name}</TableCell>
               <TableCell>{p.profiles?.student_no ?? "—"}</TableCell>
+              <TableCell>{p.profiles?.email ?? "—"}</TableCell>
               <TableCell>{p.profiles?.course ?? "—"}</TableCell>
               <TableCell>{formatDateTime(p.registered_at)}</TableCell>
               <TableCell>
@@ -625,7 +638,7 @@ function ParticipantsPanel({ eventId }: { eventId: string }) {
 
 function AttendancePanel({ eventId, event }: { eventId: string; event: EventData }) {
   const queryClient = useQueryClient();
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["participants", eventId],
     queryFn: () => listParticipants(eventId),
   });
@@ -646,6 +659,8 @@ function AttendancePanel({ eventId, event }: { eventId: string; event: EventData
   });
 
   const present = (data ?? []).filter((p) => p.attendance.length > 0);
+
+  if (error) return <EmptyState title="Unable to load participants" description={error.message} />;
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -711,11 +726,13 @@ function AttendancePanel({ eventId, event }: { eventId: string; event: EventData
 }
 
 function EvaluationsPanel({ eventId }: { eventId: string }) {
-  const { data } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ["event-evaluations", eventId],
     queryFn: () => listEvaluations({ eventId }),
   });
 
+  if (isLoading) return <EmptyState title="Loading evaluations..." />;
+  if (error) return <EmptyState title="Unable to load evaluations" description={error.message} />;
   if (!data?.length) return <EmptyState title="No evaluations submitted yet" />;
 
   const avg = (key: "rating_content" | "rating_organization" | "rating_venue" | "rating_overall") =>
